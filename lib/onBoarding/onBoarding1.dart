@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../Login/login.dart';
 import 'onBoarding2.dart';
 
 class onBoarding1 extends StatelessWidget {
@@ -19,7 +20,9 @@ class onBoarding1 extends StatelessWidget {
                 Container(
                   height: 35,
                   width: 70,
-                  child: TextButton(onPressed: (){}, child: Text(
+                  child: TextButton(onPressed: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>login()));
+                  }, child: Text(
                     "Skip", style: TextStyle(
                     color: Colors.white,
                     fontSize: 14

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_parking/Login/login.dart';
 
 import 'onBoarding1.dart';
 import 'onBoarding2.dart';
@@ -20,7 +21,9 @@ class onBoarding3 extends StatelessWidget {
                 Container(
                   height: 35,
                   width: 70,
-                  child: TextButton(onPressed: (){}, child: Text(
+                  child: TextButton(onPressed: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> login()));
+                  }, child: Text(
                     "Skip", style: TextStyle(
                       color: Colors.white,
                       fontSize: 14
@@ -94,7 +97,9 @@ class onBoarding3 extends StatelessWidget {
             ),
             Container(
               width: double.infinity,
-              child: ElevatedButton(onPressed: (){}, child: Text(
+              child: ElevatedButton(onPressed: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>login()));
+              }, child: Text(
                 "GET STARTED",style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
