@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:smart_parking/Notification/notification.dart";
+import "package:smart_parking/bottomBar/Home/ParkingReservation/parkingReservationScreen.dart";
 import "package:smart_parking/bottomBar/Home/humidity/humidity.dart";
 import "package:smart_parking/bottomBar/Home/temperature/temperature.dart";
 
@@ -15,7 +16,7 @@ class SelectItems {
 
 class selectPages extends StatelessWidget {
   final List<SelectItems> selects = [
-    SelectItems("directions_car", "Car\nReservation", humidity()),
+    SelectItems("directions_car", "Car\nReservation", ParkingReservationScreen()),
     SelectItems("notifications_active", "My\nNotification", NotificationPage()),
     SelectItems("opacity", "Parking\nHumidity", humidity()),
     SelectItems("wb_cloudy", "Parking\nTemperature", temperature()),
