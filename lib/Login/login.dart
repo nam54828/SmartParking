@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_parking/Register/register.dart';
-import 'package:smart_parking/onBoarding/onBoarding3.dart';
+
+import '../bottomBar/Home/home.dart';
+import '../main.dart';
 
 class login extends StatefulWidget {
   const login({Key? key}) : super(key: key);
@@ -56,6 +58,9 @@ class _loginState extends State<login> {
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.email, color: Color.fromRGBO(1, 4, 108, 1),),
 
+                      ),
+                      style: TextStyle(
+                        color: Colors.white
                       ),
                       controller: emailController,
                       validator: (value){
@@ -116,7 +121,7 @@ class _loginState extends State<login> {
                       FirebaseAuth.instance.signInWithEmailAndPassword(email: emailController.text,
                           password: passwordController.text)
                           .then((value){
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => onBoarding3()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage()));
                       }).onError((error, stackTrace) {
                         showFailMessage();
                       });

@@ -40,6 +40,11 @@ dependencies:
   firebase_auth: ^4.10.1
   firebase_core: ^2.17.0
   firebase_database: ^10.2.7
+  mqtt_client: ^10.0.0
+  fl_chart: ^0.40.0
+  syncfusion_flutter_gauges: ^23.1.41
+  provider: ^6.0.5
+  shared_preferences: ^2.2.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
