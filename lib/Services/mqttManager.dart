@@ -54,4 +54,10 @@ class MqttManager {
   void disconnect() {
     client?.disconnect();
   }
+  void publish(String topic, String message) {
+    final builder = MqttClientPayloadBuilder();
+    builder.addString(message);
+    client!.publishMessage(topic, MqttQos.atLeastOnce, builder.payload!);
+  }
+
 }
