@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'dart:math' as math;
 
@@ -21,6 +22,9 @@ class _humidityState extends State<humidity> {
 
   double currentHumidity = 0.0;
   DatabaseReference? databaseReference;
+
+  bool _isConnected = false;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +47,9 @@ class _humidityState extends State<humidity> {
         _updateCurrentHumidity(payload);
 
       }
+    });
+    setState(() {
+      _isConnected = true;
     });
   }
   void _updateCurrentHumidity(String payload) {
@@ -76,91 +83,107 @@ class _humidityState extends State<humidity> {
       return 'Invalid humidity data';
     }
   }
+
   @override
   Widget build(BuildContext context) {
     String humidityDescription = getHumidityDescription(currentHumidity);
-
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.black,
         title: Text("Humidity", style: TextStyle(
-          color: Colors.black,
+          color: Colors.white,
           fontWeight: FontWeight.bold,
-          fontSize: 18
+          fontSize: 16
         ),),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_left), color: Colors.white,
+          onPressed: (){
+            Navigator.pop(context);
+          },
+        ),
       ),
       backgroundColor: Colors.black,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'Humidity Gauge',
-              style: TextStyle(color: Colors.white),
-            ),
-            SizedBox(height: 20.0),
-            SfRadialGauge(
-              axes: <RadialAxis>[
-                RadialAxis(
-                  minimum: 0,
-                  maximum: 100,
-                  ranges: <GaugeRange>[
+            if(_isConnected)
+           Container(
+             child: Column(
+               children: [
+                 Text(
+                   'Humidity Gauge',
+                   style: TextStyle(color: Colors.white),
+                 ),
+                 SizedBox(height: 20.0),
+                 SfRadialGauge(
+                   axes: <RadialAxis>[
+                     RadialAxis(
+                       minimum: 0,
+                       maximum: 100,
+                       ranges: <GaugeRange>[
 
-                    GaugeRange(
-                      startValue: 0,
-                      endValue: 20,
-                      color: Colors.green,
+                         GaugeRange(
+                           startValue: 0,
+                           endValue: 20,
+                           color: Colors.green,
 
-                    ),
-                    GaugeRange(
-                      startValue: 20,
-                      endValue: 40,
-                      color: Colors.yellow,
-                    ),
-                    GaugeRange(
-                      startValue: 40,
-                      endValue: 60,
-                      color: Colors.orange,
-                    ),
-                    GaugeRange(
-                      startValue: 60,
-                      endValue: 80,
-                      color: Colors.red,
-                    ),
-                    GaugeRange(
-                      startValue: 80,
-                      endValue: 100,
-                      color: Colors.purple,
-                    ),
-                  ],
-                  pointers: <GaugePointer>[
-                    NeedlePointer(
-                      value: currentHumidity,
-                      enableAnimation: true,
-                    ),
-                  ],
-                  annotations: <GaugeAnnotation>[
-                    GaugeAnnotation(
-                      widget: Text(
-                        '$currentHumidity%',
-                        style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      angle: 90,
-                      positionFactor: 0.5,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            Text(
-              humidityDescription,
-              style: TextStyle(color: Colors.white, fontSize: 20),
-              textAlign: TextAlign.center,
-            ),
+                         ),
+                         GaugeRange(
+                           startValue: 20,
+                           endValue: 40,
+                           color: Colors.yellow,
+                         ),
+                         GaugeRange(
+                           startValue: 40,
+                           endValue: 60,
+                           color: Colors.orange,
+                         ),
+                         GaugeRange(
+                           startValue: 60,
+                           endValue: 80,
+                           color: Colors.red,
+                         ),
+                         GaugeRange(
+                           startValue: 80,
+                           endValue: 100,
+                           color: Colors.purple,
+                         ),
+                       ],
+                       pointers: <GaugePointer>[
+                         NeedlePointer(
+                           value: currentHumidity,
+                           enableAnimation: true,
+                         ),
+                       ],
+                       annotations: <GaugeAnnotation>[
+                         GaugeAnnotation(
+                           widget: Text(
+                             '$currentHumidity%',
+                             style: TextStyle(
+                               fontSize: 25,
+                               fontWeight: FontWeight.bold,
+                               color: Colors.white,
+                             ),
+                           ),
+                           angle: 90,
+                           positionFactor: 0.5,
+                         ),
+                       ],
+                     ),
+                   ],
+                 ),
+                 Text(
+                   humidityDescription,
+                   style: TextStyle(color: Colors.white, fontSize: 20),
+                   textAlign: TextAlign.center,
+                 ),
+               ],
+             ),
+           ),
+            if(!_isConnected)
+              CircularProgressIndicator()
           ],
         ),
       ),

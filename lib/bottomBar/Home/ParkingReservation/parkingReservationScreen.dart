@@ -1,11 +1,17 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mqtt_client/mqtt_client.dart';
+import 'package:smart_parking/bottomBar/profile/terms.dart';
 
-import '../../../Services/mqttManager.dart'; // Import Firestore
+import '../../../Services/mqttManager.dart';
+
+import 'package:shimmer/shimmer.dart';
+
+
 
 class ParkingReservationScreen extends StatefulWidget {
   @override
@@ -19,6 +25,10 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
   int numberOfReservations = 0;
   int totalParkingSpots = 30;
   List<bool> availableSpots = List.generate(30, (index) => true);
+
+
+  bool _isConnected = false;
+
   @override
   void initState() {
     super.initState();
@@ -28,6 +38,7 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
     Timer.periodic(Duration(minutes: 1), (Timer t) {
       checkAndRemoveExpiredReservations();
     });
+    _updateAvailableSpots();
   }
   // Hàm kiểm tra và xóa thông tin đặt chỗ sau khi hết hạn
   void checkAndRemoveExpiredReservations() async {
@@ -49,13 +60,43 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
   }
   void _connect() async {
     await _mqttManager.connect('my_client_identifier', 'nam54828', 'DoDucNam123');
-    _mqttManager.subscribe('Smartparking/reservation');
+    _mqttManager.subscribe('SmartParking/reservation');
     MqttManager.client?.updates?.listen((List<MqttReceivedMessage<MqttMessage>> event) {
       final MqttPublishMessage receivedMessage = event[0].payload as MqttPublishMessage;
       final String payload = MqttPublishPayload.bytesToStringAsString(receivedMessage.payload.message);
             print('Received message from topic: ${event[0].topic}, payload: $payload');
-       });
+      if (event[0].topic == 'SmartParking/reservation' && payload.startsWith('Spot reserved')) {
+        // Extract spot index from the payload
+        int spotIndex = int.tryParse(payload.split(' ')[2]) ?? -1;
+
+        // Update Firebase with reservation information
+        if (spotIndex != -1) {
+          makeReservationFromExternalSource(spotIndex);
+        }
+      }
+    });
+    setState(() {
+      _isConnected = true;
+    });
+
   }
+
+  //Topic from esp32
+  Future<void> makeReservationFromExternalSource(int spotIndex) async {
+    CollectionReference reservations = _firestore.collection('parking_reservations');
+    DateTime currentTime = DateTime.now();
+    DateTime expirationTime = currentTime.add(Duration(minutes: 30));
+    // Thêm thông tin đặt chỗ vào Firestore
+    await reservations.add({
+      'spotIndex': spotIndex,
+      'timestamp': FieldValue.serverTimestamp(),
+      'expirationTime': expirationTime,
+    });
+
+  }
+
+
+
   Future<void> makeReservation(int spotIndex) async {
     if (numberOfReservations < 3) {
       if (availableSpots[spotIndex]) {
@@ -96,12 +137,14 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
             numberOfReservations++;
             availableSpots[spotIndex] = false;
           });
+          await _updateAvailableSpots();
 
           // Delayed logic to free up the spot after 30 minutes
-          Future.delayed(Duration(minutes: 30), () {
+          Future.delayed(Duration(minutes: 30), () async {
             setState(() {
               availableSpots[spotIndex] = true;
             });
+            await _updateAvailableSpots();
           });
         } catch (e) {
           print('Error making reservation: $e');
@@ -146,6 +189,17 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
       );
     }
   }
+  Future<void> _updateAvailableSpots() async {
+    QuerySnapshot snapshot = await _firestore.collection('parking_reservations').get();
+
+    setState(() {
+      availableSpots = List.generate(totalParkingSpots, (index) => true);
+      for (QueryDocumentSnapshot reservation in snapshot.docs) {
+        int reservedSpotIndex = (reservation.data() as Map)['spotIndex'] - 1;
+        availableSpots[reservedSpotIndex] = false;
+      }
+    });
+  }
   Widget buildParkingSpots(List<bool> spots, int startZoneIndex) {
     return Wrap(
       spacing: 10,
@@ -175,7 +229,7 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
               child: Text(
                 'Spot ${globalIndex + 1}',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: spots[index] ? Colors.white : Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -185,6 +239,7 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
       }),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -205,6 +260,54 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 20),
+              if (!_isConnected)
+                Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: GridView(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      mainAxisExtent: 550,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                    ),
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Zone A',
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          buildParkingSpots(availableSpots.sublist(0, 10), 0),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Zone B',
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          buildParkingSpots(availableSpots.sublist(10, 20), 10),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Zone C',
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          buildParkingSpots(availableSpots.sublist(20, 30), 20),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              if (_isConnected)
               GridView(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
@@ -246,7 +349,7 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
                     ],
                   ),
                 ],
-              ),
+              ) ,
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -261,8 +364,10 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
                   ),
                   Column(
                     children: [
-                      Text("Còn trống", style: TextStyle(
-                          color: Colors.black
+                      Text("EMPTY", style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 11,
+                        fontWeight: FontWeight.bold
                       ),)
                     ],
                   ),
@@ -280,38 +385,57 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
                   ),
                   Column(
                     children: [
-                      Text("Đã đặt", style: TextStyle(
-                          color: Colors.black
+                      Text("FILL", style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold
                       ),)
                     ],
                   )
                 ],
               ),
-              Row(
-                children: [
-                  Column(
-                    children: [
-                      RichText(
-                        text: TextSpan(
-                          children: <TextSpan>[
-                            TextSpan(
-                              text: "Chú ý: ", style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black
-                            )
-                            ),
-                            TextSpan(
-                              text: "Vui lòng đọc kỹ các điều khoản trước khi đặt chỗ",
-                              style: TextStyle(
+              Container(
+                width: double.infinity,
+                child: Row(
+                  children: [
+                    Column(
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: <TextSpan>[
+                              TextSpan(
+                                text: "Note: ", style: TextStyle(
+                                fontWeight: FontWeight.bold,
                                 color: Colors.black
                               )
-                            )
-                          ]
-                        ),
-                      )
-                    ],
-                  )
-                ],
+                              ),
+                              TextSpan(
+                                text: "Please read ",
+                                style: TextStyle(
+                                  color: Colors.black
+                                )
+                              ),
+                              TextSpan(
+                                text: "the terms ",
+                                  style: TextStyle(
+                                      color: Colors.blueAccent
+                                  ),
+                                recognizer: TapGestureRecognizer()..onTap = () =>
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => theTerms()))
+                              ),
+                              TextSpan(
+                                text: "carefully before booking",
+                                style: TextStyle(
+                                  color: Colors.black
+                                )
+                              )
+                            ]
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                ),
               )
             ],
           ),

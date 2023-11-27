@@ -23,6 +23,9 @@ class _temperatureState extends State<temperature> {
 
   double currentTemperature = 0.0;
   DatabaseReference? databaseReference;
+
+  bool _isConnected = false;
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +47,11 @@ class _temperatureState extends State<temperature> {
         _updateCurrentTemperature(payload);
       }
     });
+
+    setState(() {
+      _isConnected = true;
+    });
+
   }
   void _updateCurrentTemperature(String payload) {
     // Parse payload to double (temperature value)
@@ -83,81 +91,97 @@ class _temperatureState extends State<temperature> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        backgroundColor: Colors.black,
         title: Text("Temperature", style: TextStyle(
-          color: Colors.black,
-          fontSize: 18
+          color: Colors.white,
+          fontSize: 16
         ),),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_left), color: Colors.white,
+          onPressed: (){
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'Temperature Gauge',
-              style: TextStyle(color: Colors.white),
-            ),
-            SizedBox(height: 20.0),
-            SfRadialGauge(
-              axes: <RadialAxis>[
-                RadialAxis(
-                  minimum: 0,
-                  maximum: 60,
-                  ranges: <GaugeRange>[
+            if(_isConnected)
+            Container(
+              child: Column(
+                children: [
+                  Text(
+                    'Temperature Gauge',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  SizedBox(height: 20.0),
+                  SfRadialGauge(
+                    axes: <RadialAxis>[
+                      RadialAxis(
+                        minimum: 0,
+                        maximum: 60,
+                        ranges: <GaugeRange>[
 
-                    GaugeRange(
-                      startValue: 0,
-                      endValue: 15,
-                      color: Colors.green,
+                          GaugeRange(
+                            startValue: 0,
+                            endValue: 15,
+                            color: Colors.green,
 
-                    ),
-                    GaugeRange(
-                      startValue: 15,
-                      endValue: 30,
-                      color: Colors.yellow,
-                    ),
-                    GaugeRange(
-                      startValue: 30,
-                      endValue: 45,
-                      color: Colors.orange,
-                    ),
-                    GaugeRange(
-                      startValue: 45,
-                      endValue: 60,
-                      color: Colors.red,
-                    ),
+                          ),
+                          GaugeRange(
+                            startValue: 15,
+                            endValue: 30,
+                            color: Colors.yellow,
+                          ),
+                          GaugeRange(
+                            startValue: 30,
+                            endValue: 45,
+                            color: Colors.orange,
+                          ),
+                          GaugeRange(
+                            startValue: 45,
+                            endValue: 60,
+                            color: Colors.red,
+                          ),
 
-                  ],
-                  pointers: <GaugePointer>[
-                    NeedlePointer(
-                      value: currentTemperature,
-                      enableAnimation: true,
-                    ),
-                  ],
-                  annotations: <GaugeAnnotation>[
-                    GaugeAnnotation(
-                      widget: Text(
-                        '$currentTemperature C',
-                        style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                        ],
+                        pointers: <GaugePointer>[
+                          NeedlePointer(
+                            value: currentTemperature,
+                            enableAnimation: true,
+                          ),
+                        ],
+                        annotations: <GaugeAnnotation>[
+                          GaugeAnnotation(
+                            widget: Text(
+                              '$currentTemperature C',
+                              style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            angle: 90,
+                            positionFactor: 0.5,
+                          ),
+
+                        ],
+
                       ),
-                      angle: 90,
-                      positionFactor: 0.5,
-                    ),
-
-                  ],
-
-                ),
-              ],
+                    ],
+                  ),
+                  Text(
+                    temperatureDescription,
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
-            Text(
-              temperatureDescription,
-              style: TextStyle(color: Colors.white, fontSize: 20),
-              textAlign: TextAlign.center,
-            ),
+            if(!_isConnected)
+              CircularProgressIndicator()
           ],
         ),
       ),

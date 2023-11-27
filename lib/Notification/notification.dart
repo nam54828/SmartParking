@@ -15,6 +15,7 @@ class NotificationPage extends StatefulWidget {
 class _NotificationPageState extends State<NotificationPage> {
   final MqttManager _mqttManager = MqttManager();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  int unreadNotifications = 0;
 
   @override
   void initState() {
@@ -30,7 +31,7 @@ class _NotificationPageState extends State<NotificationPage> {
       final String payload = MqttPublishPayload.bytesToStringAsString(receivedMessage.payload.message);
       print('Received message from topic: ${event[0].topic}, payload: $payload');
 
-      if (payload == '1') {
+      if (payload == '0') {
         _firestore.collection('notifications').add({
           'topic': event[0].topic,
           'payload': payload,
@@ -41,6 +42,7 @@ class _NotificationPageState extends State<NotificationPage> {
           showDialog(
             context: context,
             builder: (context) {
+              unreadNotifications++;
               return AlertDialog(
                 title: Text('Notification'),
                 content: Text('Warning: The parking lot is on fire'),
@@ -60,9 +62,17 @@ class _NotificationPageState extends State<NotificationPage> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text('MQTT Notification', style: TextStyle(
-          color: Colors.white
+          color: Colors.white,
+          fontSize: 18
         ),),
+        centerTitle: true,
         backgroundColor: Colors.black,
+        leading: IconButton(
+          onPressed: (){
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.keyboard_backspace_sharp, color: Colors.white,),
+        ),
       ),
       body: NotificationsList()
     );

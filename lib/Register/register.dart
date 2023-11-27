@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:smart_parking/Login/login.dart';
 
 class register extends StatefulWidget {
@@ -128,13 +129,21 @@ class _registerState extends State<register> {
                         child: Container(
                           color: Colors.white,
                           child: TextFormField(
+                            keyboardType: TextInputType.number,
                             decoration: InputDecoration(
                               prefixIcon: Icon(Icons.phone, color: Color.fromRGBO(1, 4, 108, 1)),
                             ),
                             controller: phoneController,
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(10),
+                                                         ],
                             validator: (value){
-                              if (value!.isEmpty){
-                                return ("Vui lòng nhập số điện thoại");
+                              RegExp regex = RegExp('[0-9]*');
+                              if (value!.isEmpty || value.length <9){
+                                return ("Please enter your phone number");
+                              }
+                              if (!regex.hasMatch(value)) {
+                                return ("Invalid phone number");
                               }
                             },
                             onSaved: (value){
@@ -173,6 +182,7 @@ class _registerState extends State<register> {
                             onSaved: (value){
                               passwordController.text = value!;
                             },
+                            obscureText: true,
                           ),
                         ),
                       ),
@@ -201,7 +211,8 @@ class _registerState extends State<register> {
                                 }
                                 confirmPasswordError = null;
                                 return null;
-                              }
+                              },
+                            obscureText: true,
                           ),
                         ),
                       ),
@@ -260,7 +271,7 @@ class _registerState extends State<register> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30)),
                         child: Text(
-                          "ĐĂNG KÝ",
+                          "REGISTER",
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_parking/Login/forgotPassword.dart';
 import 'package:smart_parking/Register/register.dart';
 
 import '../bottomBar/Home/home.dart';
@@ -110,7 +111,9 @@ class _loginState extends State<login> {
                 ),
               ),
             ),
-            TextButton(onPressed: (){},
+            TextButton(onPressed: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context) => forgotPassword()));
+            },
                 child: Text("Forgot password?")),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -127,7 +130,7 @@ class _loginState extends State<login> {
                       });
                     },
                     style:
-                    ElevatedButton.styleFrom(primary: Colors.orangeAccent),
+                    ElevatedButton.styleFrom(primary: Colors.blue),
                     child: SizedBox(
                       width: 300,
                       height: 50,

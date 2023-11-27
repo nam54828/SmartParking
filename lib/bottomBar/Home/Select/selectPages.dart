@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:smart_parking/Notification/notification.dart";
 import "package:smart_parking/bottomBar/Home/ParkingReservation/parkingReservationScreen.dart";
+import "package:smart_parking/bottomBar/Home/Select/myCar/myCar.dart";
 import "package:smart_parking/bottomBar/Home/humidity/humidity.dart";
 import "package:smart_parking/bottomBar/Home/temperature/temperature.dart";
 
@@ -9,19 +10,19 @@ import "../../profile/profile.dart";
 class SelectItems {
   final String iconsUrl;
   final String text;
-  final Widget route; // Đường dẫn đến trang được chỉ định
+  final Widget route;
 
   SelectItems(this.iconsUrl, this.text, this.route);
 }
 
 class selectPages extends StatelessWidget {
   final List<SelectItems> selects = [
-    SelectItems("directions_car", "Car\nReservation", ParkingReservationScreen()),
+    SelectItems("directions_car", "Parking\nReservation", ParkingReservationScreen()),
     SelectItems("notifications_active", "My\nNotification", NotificationPage()),
     SelectItems("opacity", "Parking\nHumidity", humidity()),
     SelectItems("wb_cloudy", "Parking\nTemperature", temperature()),
     SelectItems("person", "My\nProfile", profile()),
-    SelectItems("local_taxi", "My\nCar", humidity()),
+    SelectItems("local_taxi", "My\nCar", myCar()),
   ];
   final Map<String, IconData> iconMap = {
     'directions_car': Icons.directions_car,
@@ -37,7 +38,7 @@ class selectPages extends StatelessWidget {
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent:220,
       childAspectRatio: 3/2,
-      crossAxisSpacing: 20,
+      crossAxisSpacing: 10,
       mainAxisSpacing: 20),
       itemCount: selects.length,
       itemBuilder: (BuildContext, index){
@@ -52,13 +53,13 @@ class selectPages extends StatelessWidget {
                 color: Colors.grey
               ),
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.all(10.0),
                 child: Row(
                   children: [
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(iconMap[selects[index].iconsUrl], size: 50, color: Colors.blueAccent,),
+                        Icon(iconMap[selects[index].iconsUrl], size: 45, color: Colors.blueAccent,),
                       ],
                     ),
                     Padding(
@@ -70,7 +71,8 @@ class selectPages extends StatelessWidget {
                             selects[index].text,
                             textAlign: TextAlign.left,
                             style: TextStyle(
-                              fontWeight: FontWeight.bold
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14
                             ),
                           ),
                         ],
