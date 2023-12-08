@@ -96,26 +96,41 @@ class NotificationsList extends StatelessWidget {
           itemBuilder: (context, index) {
             final timestamp = notifications[index]['timestamp'].toDate(); // Convert Firestore timestamp to DateTime
 
-            return Container(
-              margin: EdgeInsets.all(8.0),
-              padding: EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey, width: 1.0),
-                borderRadius: BorderRadius.circular(8.0),
+            return Dismissible(
+              key:Key(notifications[index].id),
+              background: Container(
+                color: Colors.red,
+                alignment: Alignment.centerRight,
+                padding: EdgeInsets.all(16),
+                child: Icon(
+                  Icons.delete,
+                  color: Colors.white,
+                ),
               ),
-              child: ListTile(
-                title: Text("Warning: The parking lot is on fire",
-                style: TextStyle(
-                  color: Colors.white
-                ),),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Time: ${_formatDateTime(timestamp)}',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ],
+              onDismissed: (direction){
+                _firestore.collection('notifications').doc(notifications[index].id).delete();
+              },
+              child: Container(
+                margin: EdgeInsets.all(8.0),
+                padding: EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey, width: 1.0),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: ListTile(
+                  title: Text("Warning: The parking lot is on fire",
+                  style: TextStyle(
+                    color: Colors.white
+                  ),),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Time: ${_formatDateTime(timestamp)}',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

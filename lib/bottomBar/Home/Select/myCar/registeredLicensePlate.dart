@@ -222,13 +222,34 @@ class _registeredLicensePlateState extends State<registeredLicensePlate> {
                                                } finally {
                                                  await conn.close();
                                                }
-                                               // Save to Firebase Realtime Database
+
                                                if (user != null) {
                                                  try {
                                                    await FirebaseFirestore.instance.collection('UserRFID').doc(user!.uid).set({
                                                      'userId': user!.uid,
                                                      'bks':bks,
                                                      'rfid':rfid,
+                                                   });
+
+                                                   ScaffoldMessenger.of(context).showSnackBar(
+                                                     SnackBar(
+                                                       content: Text('You have successfully'),
+                                                       duration: Duration(seconds: 2),
+                                                     ),
+                                                   );
+                                                 } catch (e) {
+                                                   print('Error saving data: $e');
+                                                 }
+                                               } else {
+                                                 print('User not authenticated');
+                                               }
+
+                                               if (user != null) {
+                                                 try {
+                                                   await   databaseRef.child('UserRFID').child(user!.uid).update({
+                                                     'userId': user!.uid,
+                                                     'bks': bks,
+                                                     'rfid': rfid,
                                                    });
 
                                                    ScaffoldMessenger.of(context).showSnackBar(

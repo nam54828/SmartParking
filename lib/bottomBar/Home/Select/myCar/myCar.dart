@@ -49,138 +49,6 @@ class _myCarState extends State<myCar> {
           Navigator.pop(context);
         }, icon: Icon(Icons.arrow_left, color: Colors.white,)),
       ),
-      // body: SingleChildScrollView(
-      //   child: Column(
-      //     children: [
-      //       Center(
-      //         child: Image.asset("images/logo.png", fit: BoxFit.cover, height: 250,),
-      //       ),
-      //       Padding(padding: EdgeInsets.all(12),
-      //         child: Column(
-      //           children: [
-      //             TextFormField(
-      //               decoration: InputDecoration(
-      //                 hintText: "Please Enter BKS",
-      //                 hintStyle: TextStyle(
-      //                     color: Color.fromRGBO(136, 136, 138, 0.5)
-      //                 ),
-      //                 prefixIcon: Icon(Icons.car_crash, color: Colors.white,),
-      //
-      //               ),
-      //               style: TextStyle(
-      //                   color: Colors.white
-      //               ),
-      //               controller: bksController,
-      //               onSaved: (value) {
-      //                 bksController.text = value!;
-      //               },
-      //             ),
-      //             SizedBox(
-      //               height: 30,
-      //             ),
-      //             TextFormField(
-      //               decoration: InputDecoration(
-      //                 hintText: "Please Enter RFID Card",
-      //                 hintStyle: TextStyle(
-      //                     color: Color.fromRGBO(136, 136, 138, 0.5)
-      //                 ),
-      //                 prefixIcon: Icon(Icons.add_card, color: Colors.white,),
-      //
-      //               ),
-      //               style: TextStyle(
-      //                   color: Colors.white
-      //               ),
-      //               controller: rfidController,
-      //               onSaved: (value) {
-      //                 rfidController.text = value!;
-      //               },
-      //             ),
-      //             SizedBox(
-      //               height: 30,
-      //             ),
-      //             ElevatedButtonTheme(
-      //               data: ElevatedButtonThemeData(
-      //                 style: ElevatedButton.styleFrom(
-      //                   primary: Colors.blue,
-      //                 ),
-      //               ),
-      //               child: Container(
-      //                 padding: EdgeInsets.only(left: 5, right: 5),
-      //                 width: MediaQuery.of(context).size.width,
-      //                 child: ElevatedButton(
-      //                     style: ButtonStyle(
-      //                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-      //                         RoundedRectangleBorder(
-      //                           borderRadius: BorderRadius.circular(18.0),
-      //                         ),
-      //                       ),
-      //                     ),
-      //                     onPressed: () async{
-      //
-      //                       final bks = bksController.text;
-      //                       final rfid = rfidController.text;
-      //
-      //                       final conn = await getConnection();
-      //
-      //
-      //                       try {
-      //                         await conn.query(
-      //                           'INSERT INTO UserRFID (userId, bks, rfid) VALUES (?, ?, ?)',
-      //                           [user!.uid, bks, rfid],
-      //                         );
-      //
-      //                       } catch (e) {
-      //                         print(e);
-      //                       } finally {
-      //                         await conn.close();
-      //                       }
-      //                       // Save to Firebase Realtime Database
-      //                       if (user != null) {
-      //                         try {
-      //                           // await databaseRef.child('UserRFID').child(user!.uid).push().set({
-      //                           //   'bks': bks,
-      //                           //   'rfid': rfid,
-      //                           // });
-      //                           // await FirebaseFirestore.instance.collection('UserRFID').add({
-      //                           //   'userId': user!.uid,
-      //                           //   'bks':bks,
-      //                           //   'rfid':rfid,
-      //                           // });
-      //                           await FirebaseFirestore.instance.collection('UserRFID').doc(user!.uid).set({
-      //                             'userId': user!.uid,
-      //                             'bks': bks,
-      //                             'rfid': rfid,
-      //                           });
-      //
-      //                           // Show a success SnackBar
-      //                           ScaffoldMessenger.of(context).showSnackBar(
-      //                             SnackBar(
-      //                               content: Text('You have successfully registered your license plate'),
-      //                               duration: Duration(seconds: 2),
-      //                             ),
-      //                           );
-      //
-      //                         } catch (e) {
-      //                           print('Error saving data: $e');
-      //                         }
-      //                       } else {
-      //                         print('User not authenticated');
-      //                       }
-      //                     },
-      //                     child: Text("SUBMIT", style: TextStyle(
-      //                         color: Colors.white,
-      //                         fontWeight: FontWeight.bold
-      //                     ),)),
-      //               ),
-      //             )
-      //           ],
-      //         ),
-      //
-      //       )
-      //     ],
-      //   ),
-      // ),
-
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection("UserRFID").where("userId", isEqualTo: currentUser.currentUser!.uid).snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot){
@@ -287,15 +155,12 @@ class _myCarState extends State<myCar> {
                                     // Save to Firebase Realtime Database
                                     if (user != null) {
                                       try {
-                                        // await databaseRef.child('UserRFID').child(user!.uid).push().set({
-                                        //   'bks': bks,
-                                        //   'rfid': rfid,
-                                        // });
-                                        // await FirebaseFirestore.instance.collection('UserRFID').add({
-                                        //   'userId': user!.uid,
-                                        //   'bks':bks,
-                                        //   'rfid':rfid,
-                                        // });
+                                        await
+                                        databaseRef.child('UserRFID').child(user!.uid).set({
+                                          'userId': user!.uid,
+                                          'bks': bks,
+                                          'rfid': rfid,
+                                        });
                                         await FirebaseFirestore.instance.collection('UserRFID').doc(user!.uid).set({
                                           'userId': user!.uid,
                                           'bks': bks,

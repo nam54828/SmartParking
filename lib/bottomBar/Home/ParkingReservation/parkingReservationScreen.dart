@@ -32,14 +32,20 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
   @override
   void initState() {
     super.initState();
-    _connect();
+    _init();
+  }
 
-    // Kiểm tra và xóa thông tin đặt chỗ sau khi hết hạn mỗi 1 phút
+  void _init() async {
+    await _connect();
+    _startExpirationTimer();
+    _updateAvailableSpots();
+  }
+  void _startExpirationTimer() {
     Timer.periodic(Duration(minutes: 1), (Timer t) {
       checkAndRemoveExpiredReservations();
     });
-    _updateAvailableSpots();
   }
+
   // Hàm kiểm tra và xóa thông tin đặt chỗ sau khi hết hạn
   void checkAndRemoveExpiredReservations() async {
     QuerySnapshot snapshot = await _firestore.collection('parking_reservations').get();
@@ -58,7 +64,7 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
       }
     }
   }
-  void _connect() async {
+  Future<void> _connect() async {
     await _mqttManager.connect('my_client_identifier', 'nam54828', 'DoDucNam123');
     _mqttManager.subscribe('SmartParking/reservation');
     MqttManager.client?.updates?.listen((List<MqttReceivedMessage<MqttMessage>> event) {
@@ -240,7 +246,11 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
     );
   }
 
-
+  @override
+  void dispose() {
+    _mqttManager.disconnect();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -395,48 +405,55 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
                 ],
               ),
               Container(
-                width: double.infinity,
                 child: Row(
                   children: [
-                    Column(
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: <TextSpan>[
-                              TextSpan(
-                                text: "Note: ", style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black
-                              )
-                              ),
-                              TextSpan(
-                                text: "Please read ",
-                                style: TextStyle(
-                                  color: Colors.black
-                                )
-                              ),
-                              TextSpan(
-                                text: "the terms ",
+                    Expanded(
+                      child: Column(
+                        children: [
+                          RichText(
+                            softWrap: true, // Thêm thuộc tính này để cho phép tự động xuống hàng
+                            text: TextSpan(
+                              children: <TextSpan>[
+                                TextSpan(
+                                  text: "Note: ",
                                   style: TextStyle(
-                                      color: Colors.blueAccent
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
                                   ),
-                                recognizer: TapGestureRecognizer()..onTap = () =>
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => theTerms()))
-                              ),
-                              TextSpan(
-                                text: "carefully before booking",
-                                style: TextStyle(
-                                  color: Colors.black
-                                )
-                              )
-                            ]
-                          ),
-                        )
-                      ],
+                                ),
+                                TextSpan(
+                                  text: "Please read ",
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "the terms ",
+                                  style: TextStyle(
+                                    color: Colors.blueAccent,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => theTerms()),
+                                    ),
+                                ),
+                                TextSpan(
+                                  text: "carefully before booking",
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     )
                   ],
                 ),
               )
+
             ],
           ),
         ),
