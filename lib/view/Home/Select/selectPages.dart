@@ -1,11 +1,12 @@
 import "package:flutter/material.dart";
-import "package:smart_parking/Notification/notification.dart";
-import "package:smart_parking/bottomBar/Home/ParkingReservation/parkingReservationScreen.dart";
-import "package:smart_parking/bottomBar/Home/Select/myCar/myCar.dart";
-import "package:smart_parking/bottomBar/Home/humidity/humidity.dart";
-import "package:smart_parking/bottomBar/Home/temperature/temperature.dart";
 
+
+import "../../Notification/notification.dart";
 import "../../profile/profile.dart";
+import "../ParkingReservation/parkingReservationScreen.dart";
+import "../humidity/humidity.dart";
+import "../temperature/temperature.dart";
+import "myCar/myCar.dart";
 
 class SelectItems {
   final String iconsUrl;

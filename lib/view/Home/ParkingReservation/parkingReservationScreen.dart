@@ -5,11 +5,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mqtt_client/mqtt_client.dart';
-import 'package:smart_parking/bottomBar/profile/terms.dart';
+
 
 import '../../../Services/mqttManager.dart';
 
 import 'package:shimmer/shimmer.dart';
+
+import '../../profile/terms.dart';
 
 
 

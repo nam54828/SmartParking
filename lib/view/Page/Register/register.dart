@@ -3,7 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:smart_parking/Login/login.dart';
+
+import '../Login/login.dart';
 
 class register extends StatefulWidget {
   const register({Key? key}) : super(key: key);

@@ -3,7 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
-import 'package:smart_parking/bottomBar/Home/Select/myCar/registeredLicensePlate.dart';
+import 'package:smart_parking/view/Home/Select/myCar/registeredLicensePlate.dart';
+
 
 class myCar extends StatefulWidget {
   const myCar({Key? key}) : super(key: key);

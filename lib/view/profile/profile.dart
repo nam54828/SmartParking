@@ -3,11 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:smart_parking/Login/login.dart';
-import 'package:smart_parking/bottomBar/Home/Select/myCar/registeredLicensePlate.dart';
-import 'package:smart_parking/bottomBar/profile/terms.dart';
+import 'package:smart_parking/view/profile/terms.dart';
 
 import '../../main.dart';
+import '../Home/Select/myCar/registeredLicensePlate.dart';
+import '../Page/Login/login.dart';
 
 class profile extends StatefulWidget {
   const profile({Key? key}) : super(key: key);

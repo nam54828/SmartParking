@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_parking/Login/login.dart';
-
+import '../Login/login.dart';
 import 'onBoarding1.dart';
 import 'onBoarding2.dart';
 

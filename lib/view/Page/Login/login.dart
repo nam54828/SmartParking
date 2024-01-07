@@ -1,10 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_parking/Login/forgotPassword.dart';
-import 'package:smart_parking/Register/register.dart';
 
-import '../bottomBar/Home/home.dart';
-import '../main.dart';
+import '../../../main.dart';
+import '../Register/register.dart';
+import 'forgotPassword.dart';
 
 class login extends StatefulWidget {
   const login({Key? key}) : super(key: key);

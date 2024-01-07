@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:smart_parking/onBoarding/onBoarding3.dart';
 
 import '../Login/login.dart';
 import 'onBoarding1.dart';
+import 'onBoarding3.dart';
 
 class onBoarding2 extends StatelessWidget {
   const onBoarding2({Key? key}) : super(key: key);

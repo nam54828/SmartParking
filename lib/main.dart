@@ -1,9 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_parking/bottomBar/Home/home.dart';
-import 'package:smart_parking/bottomBar/profile/profile.dart';
-import 'package:smart_parking/onBoarding/onBoarding1.dart';
+import 'package:smart_parking/Provider/humidity_provider.dart';
+import 'package:smart_parking/Provider/notification_provider.dart';
+import 'package:smart_parking/Provider/temperature_provider.dart';
+import 'package:smart_parking/view/Home/home.dart';
+import 'package:smart_parking/view/Page/onBoarding/onBoarding1.dart';
+import 'package:smart_parking/view/profile/profile.dart';
 
 import 'firebase_options.dart';
 
@@ -12,7 +15,15 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(providers: [
+      ChangeNotifierProvider(create: (context) => TemperatureProvider()),
+      ChangeNotifierProvider(create: (context) => HumidityProvider()),
+      ChangeNotifierProvider(create: (context) => NotificationProvider()),
+    ],
+    child: MyApp(),),
+  );
+
 }
 
 class MyApp extends StatelessWidget {
