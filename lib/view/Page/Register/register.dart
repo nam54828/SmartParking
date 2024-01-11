@@ -61,31 +61,30 @@ class _registerState extends State<register> {
                       SizedBox(
                         height: 10,
                       ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          color: Colors.white,
-                          child: TextFormField(
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.email, color: Color.fromRGBO(1, 4, 108, 1)),
-                            ),
-                            controller: emailController,
-                            validator: (value){
-                              if(value!.isEmpty){
-                                return ("Vui lòng nhập email");
-                              }
-                              if (!RegExp(
-                                  "^[a-zA-Z0-9+_.-]+@[a-z0-9A-Z.-]+.[a-z]")
-                                  .hasMatch(value)) {
-                                return ("Vui lòng nhập Email hợp lệ");
-                              }
-                              return null;
-                            },
-                            onSaved: (value){
-                              emailController.text = value!;
-                            },
+                      TextFormField(
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.email, color: Color.fromRGBO(1, 4, 108, 1)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)
                           ),
+                          fillColor: Colors.white,
+                          filled: true
                         ),
+                        controller: emailController,
+                        validator: (value){
+                          if(value!.isEmpty){
+                            return ("Vui lòng nhập email");
+                          }
+                          if (!RegExp(
+                              "^[a-zA-Z0-9+_.-]+@[a-z0-9A-Z.-]+.[a-z]")
+                              .hasMatch(value)) {
+                            return ("Vui lòng nhập Email hợp lệ");
+                          }
+                          return null;
+                        },
+                        onSaved: (value){
+                          emailController.text = value!;
+                        },
                       ),
                       SizedBox(
                         height: 10,
@@ -96,25 +95,24 @@ class _registerState extends State<register> {
                       SizedBox(
                         height: 10,
                       ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          color: Colors.white,
-                          child: TextFormField(
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.person, color: Color.fromRGBO(1, 4, 108, 1)),
-                            ),
-                            controller: usernameController,
-                            validator: (value){
-                              if(value!.isEmpty){
-                                return ("Vui lòng nhập họ và tên");
-                              }
-                            },
-                            onSaved: (value){
-                              usernameController.text = value!;
-                            },
+                      TextFormField(
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.person, color: Color.fromRGBO(1, 4, 108, 1)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)
                           ),
+                          filled: true,
+                          fillColor: Colors.white
                         ),
+                        controller: usernameController,
+                        validator: (value){
+                          if(value!.isEmpty){
+                            return ("Vui lòng nhập họ và tên");
+                          }
+                        },
+                        onSaved: (value){
+                          usernameController.text = value!;
+                        },
                       ),
                       SizedBox(
                         height: 10,
@@ -125,33 +123,32 @@ class _registerState extends State<register> {
                       SizedBox(
                         height: 10,
                       ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          color: Colors.white,
-                          child: TextFormField(
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.phone, color: Color.fromRGBO(1, 4, 108, 1)),
-                            ),
-                            controller: phoneController,
-                            inputFormatters: [
-                              LengthLimitingTextInputFormatter(10),
-                                                         ],
-                            validator: (value){
-                              RegExp regex = RegExp('[0-9]*');
-                              if (value!.isEmpty || value.length <9){
-                                return ("Please enter your phone number");
-                              }
-                              if (!regex.hasMatch(value)) {
-                                return ("Invalid phone number");
-                              }
-                            },
-                            onSaved: (value){
-                              phoneController.text = value!;
-                            },
+                      TextFormField(
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.phone, color: Color.fromRGBO(1, 4, 108, 1)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)
                           ),
+                          fillColor: Colors.white,
+                          filled: true
                         ),
+                        controller: phoneController,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(10),
+                                                     ],
+                        validator: (value){
+                          RegExp regex = RegExp('[0-9]*');
+                          if (value!.isEmpty || value.length <9){
+                            return ("Please enter your phone number");
+                          }
+                          if (!regex.hasMatch(value)) {
+                            return ("Invalid phone number");
+                          }
+                        },
+                        onSaved: (value){
+                          phoneController.text = value!;
+                        },
                       ),
                       SizedBox(
                         height: 10,
@@ -162,33 +159,32 @@ class _registerState extends State<register> {
                       SizedBox(
                         height: 10,
                       ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          color: Colors.white,
-                          child: TextFormField(
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.password, color: Color.fromRGBO(1, 4, 108, 1)),
-                            ),
-                            controller: passwordController,
-                            validator: (value){
-                              RegExp regex = RegExp(r'^.{6,}$');
-                              if (value!.isEmpty){
-                                return ("Vui lòng nhập mật khẩu");
-                              }
-                              if (!regex.hasMatch(value)) {
-                                return ("Mật khẩu không hợp lệ");
-                              }
-                            },
-                            onSaved: (value){
-                              passwordController.text = value!;
-                            },
-                            obscureText: true,
+                      TextFormField(
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.password, color: Color.fromRGBO(1, 4, 108, 1)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
                           ),
+                          fillColor: Colors.white,
+                          filled: true,
                         ),
+                        controller: passwordController,
+                        validator: (value){
+                          RegExp regex = RegExp(r'^.{6,}$');
+                          if (value!.isEmpty){
+                            return ("Vui lòng nhập mật khẩu");
+                          }
+                          if (!regex.hasMatch(value)) {
+                            return ("Mật khẩu không hợp lệ");
+                          }
+                        },
+                        onSaved: (value){
+                          passwordController.text = value!;
+                        },
+                        obscureText: true,
                       ),
                       SizedBox(
-                        height: 10,
+                        height: 10
                       ),
                       Text("CONFIRM PASSWORD:", style: TextStyle(
                         color: Colors.white
@@ -196,26 +192,25 @@ class _registerState extends State<register> {
                       SizedBox(
                         height: 10,
                       ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          color: Colors.white,
-                          child: TextFormField(
-                              decoration: InputDecoration(
-                                prefixIcon: Icon(Icons.password, color: Color.fromRGBO(1, 4, 108, 1)),
-                              ),
-                              controller: confirmPasswordController,
-                              validator: (value) {
-                                if (value != passwordController.text) {
-                                  confirmPasswordError = "Passwords do not match";
-                                  return null; // Return null to indicate no error to the TextFormField
-                                }
-                                confirmPasswordError = null;
-                                return null;
-                              },
-                            obscureText: true,
+                      TextFormField(
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.password, color: Color.fromRGBO(1, 4, 108, 1)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)
                           ),
-                        ),
+                            filled: true,
+                            fillColor: Colors.white
+                          ),
+                          controller: confirmPasswordController,
+                          validator: (value) {
+                            if (value != passwordController.text) {
+                              confirmPasswordError = "Passwords do not match";
+                              return null; // Return null to indicate no error to the TextFormField
+                            }
+                            confirmPasswordError = null;
+                            return null;
+                          },
+                        obscureText: true,
                       ),
                       if (confirmPasswordError != null)
                         Padding(

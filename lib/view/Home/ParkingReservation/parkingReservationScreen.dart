@@ -5,6 +5,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mqtt_client/mqtt_client.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_parking/Provider/reservation_provider.dart';
 
 
 import '../../../Services/mqttManager.dart';
@@ -21,194 +23,19 @@ class ParkingReservationScreen extends StatefulWidget {
 }
 
 class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final MqttManager _mqttManager = MqttManager();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  int numberOfReservations = 0;
-  int totalParkingSpots = 30;
-  List<bool> availableSpots = List.generate(30, (index) => true);
-
-
-  bool _isConnected = false;
-
   @override
   void initState() {
     super.initState();
-    _init();
+    Provider.of<ReservationProvider>(context, listen: false).connect();
+  }
+  @override
+  void dispose() {
+    Provider.of<ReservationProvider>(context, listen: false).disconnect();
+    super.dispose();
   }
 
-  void _init() async {
-    await _connect();
-    _startExpirationTimer();
-    _updateAvailableSpots();
-  }
-  void _startExpirationTimer() {
-    Timer.periodic(Duration(minutes: 1), (Timer t) {
-      checkAndRemoveExpiredReservations();
-    });
-  }
-
-  // Hàm kiểm tra và xóa thông tin đặt chỗ sau khi hết hạn
-  void checkAndRemoveExpiredReservations() async {
-    QuerySnapshot snapshot = await _firestore.collection('parking_reservations').get();
-    DateTime currentTime = DateTime.now();
-
-    for (QueryDocumentSnapshot reservation in snapshot.docs) {
-      DateTime expirationTime = (reservation.data() as Map)['expirationTime'].toDate();
-      if (currentTime.isAfter(expirationTime)) {
-        // Xóa thông tin đặt chỗ đã hết hạn
-        await _firestore.collection('parking_reservations').doc(reservation.id).delete();
-        // Cập nhật trạng thái của chỗ đỗ xe
-        int expiredSpotIndex = (reservation.data() as Map)['spotIndex'] - 1;
-        setState(() {
-          availableSpots[expiredSpotIndex] = true;
-        });
-      }
-    }
-  }
-  Future<void> _connect() async {
-    await _mqttManager.connect('my_client_identifier', 'nam54828', 'DoDucNam123');
-    _mqttManager.subscribe('SmartParking/reservation');
-    MqttManager.client?.updates?.listen((List<MqttReceivedMessage<MqttMessage>> event) {
-      final MqttPublishMessage receivedMessage = event[0].payload as MqttPublishMessage;
-      final String payload = MqttPublishPayload.bytesToStringAsString(receivedMessage.payload.message);
-            print('Received message from topic: ${event[0].topic}, payload: $payload');
-      if (event[0].topic == 'SmartParking/reservation' && payload.startsWith('Spot reserved')) {
-        // Extract spot index from the payload
-        int spotIndex = int.tryParse(payload.split(' ')[2]) ?? -1;
-
-        // Update Firebase with reservation information
-        if (spotIndex != -1) {
-          makeReservationFromExternalSource(spotIndex);
-        }
-      }
-    });
-    setState(() {
-      _isConnected = true;
-    });
-
-  }
-
-  //Topic from esp32
-  Future<void> makeReservationFromExternalSource(int spotIndex) async {
-    CollectionReference reservations = _firestore.collection('parking_reservations');
-    DateTime currentTime = DateTime.now();
-    DateTime expirationTime = currentTime.add(Duration(minutes: 30));
-    // Thêm thông tin đặt chỗ vào Firestore
-    await reservations.add({
-      'spotIndex': spotIndex,
-      'timestamp': FieldValue.serverTimestamp(),
-      'expirationTime': expirationTime,
-    });
-
-  }
-
-
-
-  Future<void> makeReservation(int spotIndex) async {
-    if (numberOfReservations < 3) {
-      if (availableSpots[spotIndex]) {
-        try {
-          CollectionReference reservations = _firestore.collection('parking_reservations');
-          DateTime currentTime = DateTime.now();
-          DateTime expirationTime = currentTime.add(Duration(minutes: 30)); // Thời gian hết hạn: thời gian hiện tại cộng thêm 30 phút
-          User? user = _auth.currentUser;
-          String? userID = user?.uid;
-          // Thêm thông tin đặt chỗ vào Firestore
-          await reservations.add({
-            'spotIndex': spotIndex + 1,
-            'timestamp': FieldValue.serverTimestamp(),
-            'expirationTime': expirationTime,
-            'userID': userID, // Thay thế bằng thông tin người dùng thực tế
-          });
-          // Publish the reservation spot to ESP32 via MQTT
-          _mqttManager.publish('SmartParking/reservation', 'Spot reserved: ${spotIndex + 1}');
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Successful Reservation'),
-                content: Text('Parking spot ${spotIndex + 1} is reserved for 30 minutes.'),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text('OK'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              );
-            },
-          );
-
-          setState(() {
-            numberOfReservations++;
-            availableSpots[spotIndex] = false;
-          });
-          await _updateAvailableSpots();
-
-          // Delayed logic to free up the spot after 30 minutes
-          Future.delayed(Duration(minutes: 30), () async {
-            setState(() {
-              availableSpots[spotIndex] = true;
-            });
-            await _updateAvailableSpots();
-          });
-        } catch (e) {
-          print('Error making reservation: $e');
-          // Handle error - You might want to display an error message to the user
-        }
-      } else {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Spot Already Reserved'),
-              content: Text('Parking spot ${spotIndex + 1} is already reserved.'),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      }
-    } else {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Maximum Reservations Reached'),
-            content: Text('You have reached the maximum number of reservations for today.'),
-            actions: <Widget>[
-              TextButton(
-                child: Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
-  Future<void> _updateAvailableSpots() async {
-    QuerySnapshot snapshot = await _firestore.collection('parking_reservations').get();
-
-    setState(() {
-      availableSpots = List.generate(totalParkingSpots, (index) => true);
-      for (QueryDocumentSnapshot reservation in snapshot.docs) {
-        int reservedSpotIndex = (reservation.data() as Map)['spotIndex'] - 1;
-        availableSpots[reservedSpotIndex] = false;
-      }
-    });
-  }
   Widget buildParkingSpots(List<bool> spots, int startZoneIndex) {
+    final model = Provider.of<ReservationProvider>(context);
     return Wrap(
       spacing: 10,
       runSpacing: 10,
@@ -216,7 +43,7 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
         final globalIndex = startZoneIndex + index;
         return GestureDetector(
           onTap: () {
-            makeReservation(globalIndex);
+            model.makeReservation(context, globalIndex);
           },
           child: AnimatedContainer(
             duration: Duration(milliseconds: 500),
@@ -249,12 +76,8 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
   }
 
   @override
-  void dispose() {
-    _mqttManager.disconnect();
-    super.dispose();
-  }
-  @override
   Widget build(BuildContext context) {
+    final model = Provider.of<ReservationProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Parking Reservation'),
@@ -267,12 +90,12 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Available Parking Spots: ${availableSpots.where((spot) => spot).length}/$totalParkingSpots',
+                'Available Parking Spots: ${model.availableSpots.where((spot) => spot).length}/30',
                 style: TextStyle(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 20),
-              if (!_isConnected)
+              if (!model.isConnected)
                 Shimmer.fromColors(
                   baseColor: Colors.grey[300]!,
                   highlightColor: Colors.grey[100]!,
@@ -293,7 +116,7 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
                             'Zone A',
                             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                           ),
-                          buildParkingSpots(availableSpots.sublist(0, 10), 0),
+                          buildParkingSpots(model.availableSpots.sublist(0, 10), 0),
                         ],
                       ),
                       Column(
@@ -303,7 +126,7 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
                             'Zone B',
                             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                           ),
-                          buildParkingSpots(availableSpots.sublist(10, 20), 10),
+                          buildParkingSpots(model.availableSpots.sublist(10, 20), 10),
                         ],
                       ),
                       Column(
@@ -313,13 +136,13 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
                             'Zone C',
                             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                           ),
-                          buildParkingSpots(availableSpots.sublist(20, 30), 20),
+                          buildParkingSpots(model.availableSpots.sublist(20, 30), 20),
                         ],
                       ),
                     ],
                   ),
                 ),
-              if (_isConnected)
+              if (model.isConnected)
               GridView(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
@@ -337,7 +160,7 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
                         'Zone A',
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      buildParkingSpots(availableSpots.sublist(0, 10), 0),
+                      buildParkingSpots(model.availableSpots.sublist(0, 10), 0),
                     ],
                   ),
                   Column(
@@ -347,7 +170,7 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
                         'Zone B',
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      buildParkingSpots(availableSpots.sublist(10, 20), 10),
+                      buildParkingSpots(model.availableSpots.sublist(10, 20), 10),
                     ],
                   ),
                   Column(
@@ -357,7 +180,7 @@ class _ParkingReservationScreenState extends State<ParkingReservationScreen> {
                         'Zone C',
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      buildParkingSpots(availableSpots.sublist(20, 30), 20),
+                      buildParkingSpots(model.availableSpots.sublist(20, 30), 20),
                     ],
                   ),
                 ],

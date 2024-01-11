@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_parking/Provider/humidity_provider.dart';
 import 'package:smart_parking/Provider/notification_provider.dart';
+import 'package:smart_parking/Provider/reservation_provider.dart';
 import 'package:smart_parking/Provider/temperature_provider.dart';
 import 'package:smart_parking/view/Home/home.dart';
 import 'package:smart_parking/view/Page/onBoarding/onBoarding1.dart';
@@ -20,6 +21,7 @@ void main() async {
       ChangeNotifierProvider(create: (context) => TemperatureProvider()),
       ChangeNotifierProvider(create: (context) => HumidityProvider()),
       ChangeNotifierProvider(create: (context) => NotificationProvider()),
+      ChangeNotifierProvider(create: (context) => ReservationProvider()),
     ],
     child: MyApp(),),
   );
