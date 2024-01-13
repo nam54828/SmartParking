@@ -47,6 +47,7 @@ dependencies:
   shared_preferences: ^2.2.2
   shimmer: ^3.0.0
   mysql1: ^0.20.0
+  flutter_local_notifications:
 dev_dependencies:
   flutter_test:
     sdk: flutter

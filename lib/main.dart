@@ -5,6 +5,7 @@ import 'package:smart_parking/Provider/humidity_provider.dart';
 import 'package:smart_parking/Provider/notification_provider.dart';
 import 'package:smart_parking/Provider/reservation_provider.dart';
 import 'package:smart_parking/Provider/temperature_provider.dart';
+import 'package:smart_parking/Services/notifcation_service.dart';
 import 'package:smart_parking/view/Home/home.dart';
 import 'package:smart_parking/view/Page/onBoarding/onBoarding1.dart';
 import 'package:smart_parking/view/profile/profile.dart';
@@ -16,6 +17,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  NotificationService().initializeNotifications();
   runApp(
     MultiProvider(providers: [
       ChangeNotifierProvider(create: (context) => TemperatureProvider()),
@@ -30,8 +32,6 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:smart_parking/Services/mqttManager.dart';
+import 'package:smart_parking/Services/notifcation_service.dart';
 
 class NotificationProvider extends ChangeNotifier {
   final MqttManager _mqttManager = MqttManager();
@@ -13,17 +14,15 @@ class NotificationProvider extends ChangeNotifier {
   int get unreadNotifications => _unreadNotifications;
   bool get isConnected => _isConnected;
 
-  void connect(BuildContext context) async {
+  void connect() async {
     await _mqttManager.connect('my_client_identifier', 'nam54828', 'DoDucNam123');
     _mqttManager.subscribe('SmartParking/flame');
-    MqttManager.client?.updates?.listen((event){
-      _onMessage(context, event);
-    });
+    MqttManager.client?.updates?.listen(_onMessage);
     _isConnected = true;
     notifyListeners();
   }
 
-  void _onMessage(BuildContext context, List<MqttReceivedMessage<MqttMessage>> event) {
+  void _onMessage( List<MqttReceivedMessage<MqttMessage>> event) {
     final MqttPublishMessage message = event[0].payload as MqttPublishMessage;
     final payload = MqttPublishPayload.bytesToStringAsString(message.payload.message);
     final topic = event[0].topic;
@@ -36,31 +35,12 @@ class NotificationProvider extends ChangeNotifier {
         'payload': payload,
         'timestamp': DateTime.now(),
       });
-      _showDialog(context);
+      NotificationService().showNotification('Notification', 'The parking lot is fire');
     } else {
       print('Failed to connect');
     }
   }
 
-  void _showDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Notification'),
-          content: Text('The parrking lot is fire'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   void disconnect() {
     _mqttManager.unsubscribe('SmartParking/flame');

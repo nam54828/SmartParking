@@ -17,13 +17,13 @@ class _NotificationPageState extends State<NotificationPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    Provider.of<NotificationProvider>(context, listen: false).connect(context);
+    Provider.of<NotificationProvider>(context, listen: false).connect();
   }
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    Provider.of<NotificationProvider>(context,listen: false).disconnect;
+    Provider.of<NotificationProvider>(context,listen: false).disconnect();
   }
   @override
   Widget build(BuildContext context) {
